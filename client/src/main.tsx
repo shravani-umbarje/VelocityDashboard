@@ -4,8 +4,7 @@ import axios from "axios";
 import { io, Socket } from "socket.io-client";
 import "./styles.css";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
-type User = { id:string; name:string; email:string; role:"ADMIN"|"PM"|"DEVELOPER" };
+const API = "https://velocitydashboard.onrender.com";type User = { id:string; name:string; email:string; role:"ADMIN"|"PM"|"DEVELOPER" };
 type Project = { id:string; name:string; description?:string; client?:{name:string}; _count?:{tasks:number} };
 type Task = { id:number; title:string; description?:string; status:string; priority:string; dueDate:string; assignedDeveloper?:{id:string;name:string} };
 type Activity = { id:string; message:string; createdAt:string; actor?:{name:string}; project?:{name:string} };
