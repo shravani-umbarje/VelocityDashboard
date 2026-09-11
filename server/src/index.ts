@@ -153,7 +153,7 @@ app.post("/api/projects", auth, roles(Role.ADMIN, Role.PM), async (req: AuthedRe
 });
 
 app.get("/api/projects/:projectId/tasks", auth, async (req: AuthedRequest, res) => {
-  const projectId = req.params.projectId;
+  const projectId = String(req.params.projectId);
   if (!(await projectAllowed(req.user!, projectId))) return error(res, 403, "You cannot access this project");
   const q = z.object({
     status: z.nativeEnum(TaskStatus).optional(),
@@ -175,7 +175,7 @@ app.get("/api/projects/:projectId/tasks", auth, async (req: AuthedRequest, res) 
 });
 
 app.post("/api/projects/:projectId/tasks", auth, roles(Role.ADMIN, Role.PM), async (req: AuthedRequest, res) => {
-  const projectId = req.params.projectId;
+  const projectId = String(req.params.projectId);
   if (!(await projectAllowed(req.user!, projectId))) return error(res, 403, "You cannot manage this project");
   const p = z.object({
     title: z.string().min(2), description: z.string().optional(),
@@ -198,7 +198,7 @@ app.post("/api/projects/:projectId/tasks", auth, roles(Role.ADMIN, Role.PM), asy
 });
 
 app.patch("/api/tasks/:taskId/status", auth, async (req: AuthedRequest, res) => {
-  const taskId = Number(req.params.taskId);
+  const taskId = Number(String(req.params.taskId));
   if (!Number.isInteger(taskId) || !(await taskAllowed(req.user!, taskId))) return error(res, 403, "You cannot update this task");
   const p = z.object({ status: z.nativeEnum(TaskStatus).refine(v => v !== TaskStatus.OVERDUE) }).safeParse(req.body);
   if (!p.success) return error(res, 400, "Invalid status");
@@ -228,7 +228,7 @@ app.patch("/api/tasks/:taskId/status", auth, async (req: AuthedRequest, res) => 
 });
 
 app.get("/api/projects/:projectId/activity", auth, async (req: AuthedRequest, res) => {
-  const projectId = req.params.projectId;
+  const projectId = String(req.params.projectId);
   if (!(await projectAllowed(req.user!, projectId))) return error(res, 403, "You cannot access this project");
   const activities = await prisma.activity.findMany({
     where: { projectId }, include: { actor: { select: { id: true, name: true } }, task: { select: { id: true, title: true } } },
@@ -251,7 +251,7 @@ app.get("/api/notifications", auth, async (req: AuthedRequest, res) => {
   res.json({ success: true, notifications, unread });
 });
 app.patch("/api/notifications/:id/read", auth, async (req: AuthedRequest, res) => {
-  const n = await prisma.notification.updateMany({ where: { id: req.params.id, userId: req.user!.id }, data: { isRead: true } });
+  const n = await prisma.notification.updateMany({ where: { id: String(req.params.id), userId: req.user!.id }, data: { isRead: true } });
   res.json({ success: true, updated: n.count });
 });
 app.patch("/api/notifications/read-all", auth, async (req: AuthedRequest, res) => {
